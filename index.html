@@ -447,6 +447,19 @@
                 <label>Bottom (rem):</label>
                 <input type="range" id="pad-bottom" min="0" max="10" step="0.5" value="2.5" oninput="app.updateSettings()">
             </div>
+
+            <hr style="border: 1px solid var(--glass-border); margin: 1.5rem 0;">
+
+            <p class="mb-2" style="color: var(--primary);">Data Backup</p>
+            <p style="font-size: 0.9rem; color: #888; margin-bottom: 1.5rem;">Save your progress and settings to a file, or restore from a previous backup.</p>
+            
+            <div class="button-group">
+                <button class="btn btn-secondary" onpointerdown="app.exportData()">Export Backup (.json)</button>
+                <label class="btn btn-secondary text-center" style="cursor: pointer; user-select: none;">
+                    Import Backup
+                    <input type="file" accept=".json" style="display:none" onchange="app.importData(event)">
+                </label>
+            </div>
         </div>
     </section>
 
@@ -695,6 +708,44 @@
                 localStorage.setItem('hideTimerBar', this.hideTimerBar);
                 localStorage.setItem('soundTimesUpEnabled', this.soundTimesUpEnabled);
                 this.applyTimerSettings();
+            },
+
+            exportData() {
+                const data = {};
+                for (let i = 0; i < localStorage.length; i++) {
+                    let key = localStorage.key(i);
+                    data[key] = localStorage.getItem(key);
+                }
+                const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `tables_mastery_backup_${new Date().toISOString().split('T')[0]}.json`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            },
+
+            importData(event) {
+                const file = event.target.files[0];
+                if (!file) return;
+                
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    try {
+                        const data = JSON.parse(e.target.result);
+                        for (let key in data) {
+                            localStorage.setItem(key, data[key]);
+                        }
+                        alert("Backup imported successfully!");
+                        this.init();
+                    } catch (err) {
+                        alert("Invalid backup file.");
+                    }
+                };
+                reader.readAsText(file);
+                event.target.value = '';
             },
 
             applyTimerSettings() {
