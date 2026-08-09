@@ -428,6 +428,11 @@
                 <input type="checkbox" id="hide-timer-bar" onchange="app.updateSettings()">
             </div>
 
+            <div class="settings-group">
+                <label>Time's Up Sound (15s)</label>
+                <input type="checkbox" id="sound-times-up" onchange="app.updateSettings()">
+            </div>
+
             <hr style="border: 1px solid var(--glass-border); margin: 1.5rem 0;">
 
             <p class="mb-2" style="color: var(--primary);">Adjust Layout Padding</p>
@@ -593,6 +598,7 @@
         // --- App State ---
         const app = {
             soundEnabled: true,
+            soundTimesUpEnabled: true,
             hideTimerNum: false,
             hideTimerBar: false,
             
@@ -664,8 +670,10 @@
 
                 this.hideTimerNum = localStorage.getItem('hideTimerNum') === 'true';
                 this.hideTimerBar = localStorage.getItem('hideTimerBar') === 'true';
+                this.soundTimesUpEnabled = localStorage.getItem('soundTimesUpEnabled') !== 'false';
                 document.getElementById('hide-timer-num').checked = this.hideTimerNum;
                 document.getElementById('hide-timer-bar').checked = this.hideTimerBar;
+                document.getElementById('sound-times-up').checked = this.soundTimesUpEnabled;
                 
                 this.applyTimerSettings();
             },
@@ -679,11 +687,13 @@
                 localStorage.setItem('safePaddingTop', top);
                 localStorage.setItem('safePaddingBottom', bottom);
 
-                // Timers
+                // Timers & Sounds
                 this.hideTimerNum = document.getElementById('hide-timer-num').checked;
                 this.hideTimerBar = document.getElementById('hide-timer-bar').checked;
+                this.soundTimesUpEnabled = document.getElementById('sound-times-up').checked;
                 localStorage.setItem('hideTimerNum', this.hideTimerNum);
                 localStorage.setItem('hideTimerBar', this.hideTimerBar);
+                localStorage.setItem('soundTimesUpEnabled', this.soundTimesUpEnabled);
                 this.applyTimerSettings();
             },
 
@@ -879,6 +889,7 @@
 
             startTimer() {
                 this.stats.questionStartTime = Date.now();
+                this.stats.timeUpPlayed = false;
                 const timerText = document.getElementById('question-timer');
                 const timerFill = document.getElementById('timer-fill');
                 
@@ -892,6 +903,14 @@
                     if (elapsed > 10) timerFill.style.background = '#ef4444'; 
                     else if (elapsed > 5) timerFill.style.background = '#f59e0b';
                     else timerFill.style.background = 'var(--primary)';
+
+                    if (elapsed > 15 && !this.stats.timeUpPlayed) {
+                        this.stats.timeUpPlayed = true;
+                        if (this.soundTimesUpEnabled) {
+                            playTone(150, 'sawtooth', 0.15, 0.2);
+                            setTimeout(() => playTone(100, 'sawtooth', 0.25, 0.2), 150);
+                        }
+                    }
 
                     this.stats.animFrame = requestAnimationFrame(update);
                 };
