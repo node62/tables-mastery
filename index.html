@@ -387,7 +387,8 @@
 
     <!-- HOME SCREEN -->
     <section id="screen-home" class="screen active">
-        <div style="display: flex; justify-content: flex-end;">
+        <div style="display: flex; justify-content: space-between;">
+            <button id="btn-sound" class="btn-icon" onclick="app.toggleSound()" title="Sound">&#128266;</button>
             <button class="btn-icon" onclick="app.navTo('screen-settings')" title="Settings">&#9881;</button>
         </div>
         <div class="glass-panel text-center" style="margin-top: 2rem;">
@@ -539,6 +540,7 @@
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
         function playTone(freq, type, duration, vol=0.1) {
+            if (!app.soundEnabled) return;
             if (audioCtx.state === 'suspended') audioCtx.resume();
             const osc = audioCtx.createOscillator();
             const gain = audioCtx.createGain();
@@ -568,6 +570,7 @@
 
         // --- App State ---
         const app = {
+            soundEnabled: true,
             mode: null,
             batches: ['2-5', '6-9', '11-15', '16-20'],
             numbers: [12, 13, 14, 15, 16, 17, 18, 19],
@@ -615,12 +618,12 @@
             },
 
             init() {
-                this.loadPadding();
+                this.loadSettings();
                 this.renderMatrices();
                 this.initKeyboard();
             },
 
-            loadPadding() {
+            loadSettings() {
                 const top = localStorage.getItem('safePaddingTop') || '2.5';
                 const bottom = localStorage.getItem('safePaddingBottom') || '2.5';
                 
@@ -629,6 +632,25 @@
                 
                 document.documentElement.style.setProperty('--safe-padding-top', top + 'rem');
                 document.documentElement.style.setProperty('--safe-padding-bottom', bottom + 'rem');
+
+                const soundSaved = localStorage.getItem('soundEnabled');
+                if (soundSaved !== null) {
+                    this.soundEnabled = soundSaved === 'true';
+                }
+                this.updateSoundIcon();
+            },
+
+            toggleSound() {
+                this.soundEnabled = !this.soundEnabled;
+                localStorage.setItem('soundEnabled', this.soundEnabled);
+                this.updateSoundIcon();
+            },
+
+            updateSoundIcon() {
+                const btn = document.getElementById('btn-sound');
+                if (btn) {
+                    btn.innerHTML = this.soundEnabled ? '&#128266;' : '&#128263;';
+                }
             },
 
             updatePadding() {
