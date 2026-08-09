@@ -31,6 +31,7 @@
             padding: 0;
             font-family: 'Outfit', sans-serif;
             -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation; /* Prevents 300ms tap delay */
         }
 
         body {
@@ -109,6 +110,11 @@
         }
         .settings-group input[type="range"] {
             width: 150px;
+            accent-color: var(--primary);
+        }
+        .settings-group input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
             accent-color: var(--primary);
         }
 
@@ -204,6 +210,7 @@
             align-items: center;
             transition: all 0.2s;
             color: transparent;
+            user-select: none;
         }
         .circle-btn:active {
             transform: scale(0.9);
@@ -213,10 +220,7 @@
         .circle-btn.completed {
             background: var(--primary);
             color: #000000;
-        }
-        .circle-btn.completed::after {
-            content: '✓';
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             font-weight: 800;
         }
 
@@ -354,6 +358,8 @@
             padding: 1.25rem 0;
             cursor: pointer;
             transition: background 0.1s;
+            user-select: none;
+            touch-action: manipulation;
         }
         .num-key:active { background: var(--key-active); }
         .spacer-key { background: transparent; border: none; cursor: default; }
@@ -388,10 +394,10 @@
     <!-- HOME SCREEN -->
     <section id="screen-home" class="screen active">
         <div style="display: flex; justify-content: space-between;">
-            <button id="btn-sound" class="btn-icon" onclick="app.toggleSound()" title="Sound">
+            <button id="btn-sound" class="btn-icon" onpointerdown="app.toggleSound()" title="Sound">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 24px; height: 24px;"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path><path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path></svg>
             </button>
-            <button class="btn-icon" onclick="app.navTo('screen-settings')" title="Settings">
+            <button class="btn-icon" onpointerdown="app.navTo('screen-settings')" title="Settings">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 24px; height: 24px;"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
             </button>
         </div>
@@ -400,8 +406,8 @@
             <p class="subtitle">12 to 19 Multiplication</p>
             
             <div class="button-group mt-4">
-                <button class="btn btn-primary" onclick="app.navTo('screen-practice-setup')">Practice Mode</button>
-                <button class="btn btn-secondary" onclick="app.navTo('screen-quiz-setup')">Quiz Mode</button>
+                <button class="btn btn-primary" onpointerdown="app.navTo('screen-practice-setup')">Practice Mode</button>
+                <button class="btn btn-secondary" onpointerdown="app.navTo('screen-quiz-setup')">Quiz Mode</button>
             </div>
         </div>
     </section>
@@ -409,20 +415,32 @@
     <!-- SETTINGS SCREEN -->
     <section id="screen-settings" class="screen">
         <div class="glass-panel">
-            <button class="btn-back" onclick="app.navTo('screen-home')">&larr; Back</button>
+            <button class="btn-back" onpointerdown="app.navTo('screen-home')">&larr; Back</button>
             <h2>Settings</h2>
             
+            <div class="settings-group">
+                <label>Hide Timer Number</label>
+                <input type="checkbox" id="hide-timer-num" onchange="app.updateSettings()">
+            </div>
+            
+            <div class="settings-group">
+                <label>Hide Timer Bar</label>
+                <input type="checkbox" id="hide-timer-bar" onchange="app.updateSettings()">
+            </div>
+
+            <hr style="border: 1px solid var(--glass-border); margin: 1.5rem 0;">
+
             <p class="mb-2" style="color: var(--primary);">Adjust Layout Padding</p>
             <p style="font-size: 0.9rem; color: #888; margin-bottom: 1.5rem;">Use this if your mobile browser's top address bar or bottom swipe bar is covering the buttons.</p>
             
             <div class="settings-group">
-                <label>Top Padding (rem):</label>
-                <input type="range" id="pad-top" min="0" max="10" step="0.5" value="2.5" oninput="app.updatePadding()">
+                <label>Top (rem):</label>
+                <input type="range" id="pad-top" min="0" max="10" step="0.5" value="2.5" oninput="app.updateSettings()">
             </div>
 
             <div class="settings-group">
-                <label>Bottom Padding (rem):</label>
-                <input type="range" id="pad-bottom" min="0" max="10" step="0.5" value="2.5" oninput="app.updatePadding()">
+                <label>Bottom (rem):</label>
+                <input type="range" id="pad-bottom" min="0" max="10" step="0.5" value="2.5" oninput="app.updateSettings()">
             </div>
         </div>
     </section>
@@ -430,7 +448,7 @@
     <!-- PRACTICE SETUP SCREEN -->
     <section id="screen-practice-setup" class="screen">
         <div class="glass-panel">
-            <button class="btn-back" onclick="app.navTo('screen-home')">&larr; Back</button>
+            <button class="btn-back" onpointerdown="app.navTo('screen-home')">&larr; Back</button>
             <h2>Practice Mode</h2>
             
             <div class="settings-group">
@@ -449,7 +467,7 @@
     <!-- QUIZ SETUP SCREEN -->
     <section id="screen-quiz-setup" class="screen">
         <div class="glass-panel">
-            <button class="btn-back" onclick="app.navTo('screen-home')">&larr; Back</button>
+            <button class="btn-back" onpointerdown="app.navTo('screen-home')">&larr; Back</button>
             <h2>Quiz Mode</h2>
             
             <div class="settings-group">
@@ -463,28 +481,28 @@
                 <!-- Populated by JS -->
             </div>
 
-            <button class="btn btn-primary mt-4 w-full" onclick="app.startQuiz()">Start Quiz</button>
+            <button class="btn btn-primary mt-4 w-full" onpointerdown="app.startQuiz()">Start Quiz</button>
         </div>
     </section>
 
     <!-- STUDY PHASE SCREEN -->
     <section id="screen-study" class="screen">
         <div class="glass-panel">
-            <button class="btn-back" onclick="app.abortSession()">&larr; Quit</button>
+            <button class="btn-back" onpointerdown="app.abortSession()">&larr; Quit</button>
             <h2>Study Table</h2>
             <div id="study-content" class="study-content">
                 <!-- Populated by JS -->
             </div>
-            <button class="btn btn-primary mt-4 w-full" onclick="app.startQuestions()">I'm Ready</button>
+            <button class="btn btn-primary mt-4 w-full" onpointerdown="app.startQuestions()">I'm Ready</button>
         </div>
     </section>
 
     <!-- QUESTION PHASE SCREEN -->
     <section id="screen-question" class="screen">
         <div class="question-header">
-            <div class="timer-bar"><div class="timer-fill" id="timer-fill"></div></div>
+            <div class="timer-bar" id="timer-bar-container"><div class="timer-fill" id="timer-fill"></div></div>
             <div class="stats-row">
-                <button class="btn-escape" onclick="app.abortSession()">&#x2715; Quit</button>
+                <button class="btn-escape" onpointerdown="app.abortSession()">&#x2715; Quit</button>
                 <span id="question-counter">Q: 1/10</span>
                 <span id="question-timer" class="time-text">0.0s</span>
             </div>
@@ -497,27 +515,27 @@
 
         <div id="feedback-overlay" class="feedback-overlay"></div>
 
-        <!-- CUSTOM NUMPAD (No ENT key) -->
+        <!-- CUSTOM NUMPAD (Fast pointerdown events) -->
         <div class="numpad numpad-3col">
-            <button class="num-key" onclick="app.numpadPress(7)">7</button>
-            <button class="num-key" onclick="app.numpadPress(8)">8</button>
-            <button class="num-key" onclick="app.numpadPress(9)">9</button>
-            <button class="num-key" onclick="app.numpadPress(4)">4</button>
-            <button class="num-key" onclick="app.numpadPress(5)">5</button>
-            <button class="num-key" onclick="app.numpadPress(6)">6</button>
-            <button class="num-key" onclick="app.numpadPress(1)">1</button>
-            <button class="num-key" onclick="app.numpadPress(2)">2</button>
-            <button class="num-key" onclick="app.numpadPress(3)">3</button>
+            <button class="num-key" onpointerdown="app.numpadPress(7, event)">7</button>
+            <button class="num-key" onpointerdown="app.numpadPress(8, event)">8</button>
+            <button class="num-key" onpointerdown="app.numpadPress(9, event)">9</button>
+            <button class="num-key" onpointerdown="app.numpadPress(4, event)">4</button>
+            <button class="num-key" onpointerdown="app.numpadPress(5, event)">5</button>
+            <button class="num-key" onpointerdown="app.numpadPress(6, event)">6</button>
+            <button class="num-key" onpointerdown="app.numpadPress(1, event)">1</button>
+            <button class="num-key" onpointerdown="app.numpadPress(2, event)">2</button>
+            <button class="num-key" onpointerdown="app.numpadPress(3, event)">3</button>
             <button class="num-key spacer-key"></button>
-            <button class="num-key" onclick="app.numpadPress(0)">0</button>
-            <button class="num-key action-key delete-key" onclick="app.numpadDelete()">DEL</button>
+            <button class="num-key" onpointerdown="app.numpadPress(0, event)">0</button>
+            <button class="num-key action-key delete-key" onpointerdown="app.numpadDelete(event)">DEL</button>
         </div>
     </section>
 
     <!-- SUMMARY SCREEN -->
     <section id="screen-summary" class="screen">
         <div class="glass-panel text-center">
-            <button class="btn-back" onclick="app.navTo('screen-home')" style="align-self: flex-start;">&larr; Home</button>
+            <button class="btn-back" onpointerdown="app.navTo('screen-home')" style="align-self: flex-start;">&larr; Home</button>
             <h2>Session Complete!</h2>
             
             <div class="summary-stats">
@@ -531,7 +549,7 @@
                 </div>
             </div>
 
-            <button class="btn btn-primary mt-4 w-full" onclick="app.navTo('screen-home')">Finish</button>
+            <button class="btn btn-primary mt-4 w-full" onpointerdown="app.navTo('screen-home')">Finish</button>
         </div>
     </section>
 
@@ -575,6 +593,9 @@
         // --- App State ---
         const app = {
             soundEnabled: true,
+            hideTimerNum: false,
+            hideTimerBar: false,
+            
             mode: null,
             batches: ['2-5', '6-9', '11-15', '16-20'],
             numbers: [12, 13, 14, 15, 16, 17, 18, 19],
@@ -630,10 +651,8 @@
             loadSettings() {
                 const top = localStorage.getItem('safePaddingTop') || '2.5';
                 const bottom = localStorage.getItem('safePaddingBottom') || '2.5';
-                
                 document.getElementById('pad-top').value = top;
                 document.getElementById('pad-bottom').value = bottom;
-                
                 document.documentElement.style.setProperty('--safe-padding-top', top + 'rem');
                 document.documentElement.style.setProperty('--safe-padding-bottom', bottom + 'rem');
 
@@ -642,6 +661,35 @@
                     this.soundEnabled = soundSaved === 'true';
                 }
                 this.updateSoundIcon();
+
+                this.hideTimerNum = localStorage.getItem('hideTimerNum') === 'true';
+                this.hideTimerBar = localStorage.getItem('hideTimerBar') === 'true';
+                document.getElementById('hide-timer-num').checked = this.hideTimerNum;
+                document.getElementById('hide-timer-bar').checked = this.hideTimerBar;
+                
+                this.applyTimerSettings();
+            },
+
+            updateSettings() {
+                // Padding
+                const top = document.getElementById('pad-top').value;
+                const bottom = document.getElementById('pad-bottom').value;
+                document.documentElement.style.setProperty('--safe-padding-top', top + 'rem');
+                document.documentElement.style.setProperty('--safe-padding-bottom', bottom + 'rem');
+                localStorage.setItem('safePaddingTop', top);
+                localStorage.setItem('safePaddingBottom', bottom);
+
+                // Timers
+                this.hideTimerNum = document.getElementById('hide-timer-num').checked;
+                this.hideTimerBar = document.getElementById('hide-timer-bar').checked;
+                localStorage.setItem('hideTimerNum', this.hideTimerNum);
+                localStorage.setItem('hideTimerBar', this.hideTimerBar);
+                this.applyTimerSettings();
+            },
+
+            applyTimerSettings() {
+                document.getElementById('question-timer').style.visibility = this.hideTimerNum ? 'hidden' : 'visible';
+                document.getElementById('timer-bar-container').style.visibility = this.hideTimerBar ? 'hidden' : 'visible';
             },
 
             toggleSound() {
@@ -659,17 +707,6 @@
                 }
             },
 
-            updatePadding() {
-                const top = document.getElementById('pad-top').value;
-                const bottom = document.getElementById('pad-bottom').value;
-                
-                document.documentElement.style.setProperty('--safe-padding-top', top + 'rem');
-                document.documentElement.style.setProperty('--safe-padding-bottom', bottom + 'rem');
-                
-                localStorage.setItem('safePaddingTop', top);
-                localStorage.setItem('safePaddingBottom', bottom);
-            },
-
             initKeyboard() {
                 window.addEventListener('keydown', (e) => {
                     const questionScreen = document.getElementById('screen-question');
@@ -683,12 +720,13 @@
                 });
             },
 
-            checkCompleted(num, batch) {
-                return localStorage.getItem(`practice_${num}_${batch}`) === 'true';
+            getPracticeCount(num, batch) {
+                return parseInt(localStorage.getItem(`practice_${num}_${batch}`)) || 0;
             },
 
-            setCompleted(num, batch) {
-                localStorage.setItem(`practice_${num}_${batch}`, 'true');
+            incrementPracticeCount(num, batch) {
+                let count = this.getPracticeCount(num, batch);
+                localStorage.setItem(`practice_${num}_${batch}`, count + 1);
             },
 
             renderMatrices() {
@@ -708,13 +746,14 @@
                     qHtml += `<div class="matrix-row-label">${n}</div>`;
 
                     this.batches.forEach(b => {
-                        let isCompleted = this.checkCompleted(n, b);
+                        let count = this.getPracticeCount(n, b);
                         
                         // Practice Button
-                        let pClass = isCompleted ? 'circle-btn completed' : 'circle-btn';
+                        let pClass = count > 0 ? 'circle-btn completed' : 'circle-btn';
+                        let pText = count > 0 ? count : '';
                         pHtml += `
                             <div class="matrix-cell">
-                                <button class="${pClass}" onclick="app.startPractice(${n}, '${b}')"></button>
+                                <button class="${pClass}" onpointerdown="app.startPractice(${n}, '${b}')">${pText}</button>
                             </div>`;
 
                         // Quiz Button
@@ -722,7 +761,7 @@
                         let qClass = isSelected ? 'circle-btn selected' : 'circle-btn';
                         qHtml += `
                             <div class="matrix-cell">
-                                <button class="${qClass}" onclick="app.toggleQuizSelection(${n}, '${b}')"></button>
+                                <button class="${qClass}" onpointerdown="app.toggleQuizSelection(${n}, '${b}')"></button>
                             </div>`;
                     });
                 });
@@ -773,7 +812,6 @@
                     });
                 }
 
-                // Show study screen first
                 let studyHtml = '';
                 multipliers.sort((a,b)=>a-b).forEach(m => {
                     studyHtml += `<div>${num} x ${m} = <span style="color:var(--primary)">${num * m}</span></div>`;
@@ -866,7 +904,8 @@
                 this.stats.totalTime += elapsed;
             },
 
-            numpadPress(num) {
+            numpadPress(num, e) {
+                if(e) e.preventDefault(); // Fast response, stop normal click propagation
                 if (this.currentInput.length < 4) {
                     this.currentInput += num.toString();
                     this.updateInputDisplay();
@@ -874,7 +913,8 @@
                 }
             },
 
-            numpadDelete() {
+            numpadDelete(e) {
+                if(e) e.preventDefault();
                 if (this.currentInput.length > 0) {
                     this.currentInput = this.currentInput.slice(0, -1);
                     this.updateInputDisplay();
@@ -897,11 +937,12 @@
                     const overlay = document.getElementById('feedback-overlay');
                     overlay.className = 'feedback-overlay correct-anim';
                     
+                    // Reduced delay for even faster feeling!
                     setTimeout(() => {
                         overlay.className = 'feedback-overlay';
                         this.currentQIndex++;
                         this.loadQuestion();
-                    }, 300);
+                    }, 150); 
                 }
             },
 
@@ -909,7 +950,7 @@
                 playEnd();
                 
                 if (this.mode === 'practice' && this.currentPracticeChallenge) {
-                    this.setCompleted(this.currentPracticeChallenge.num, this.currentPracticeChallenge.batch);
+                    this.incrementPracticeCount(this.currentPracticeChallenge.num, this.currentPracticeChallenge.batch);
                     this.renderMatrices();
                 }
 
