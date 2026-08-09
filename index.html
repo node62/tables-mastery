@@ -55,7 +55,7 @@
             display: none;
             flex: 1;
             flex-direction: column;
-            padding: 1.5rem;
+            padding: 2.5rem 1.5rem;
             height: 100%;
             overflow-y: auto;
         }
@@ -225,7 +225,7 @@
         #screen-question.active { display: flex; }
 
         .question-header {
-            padding: 1rem 1.5rem;
+            padding: 2.5rem 1.5rem 1rem 1.5rem;
             background: #0a0a0a;
             border-bottom: 1px solid var(--glass-border);
         }
@@ -302,7 +302,7 @@
             padding: 1rem;
             background: #0a0a0a;
             border-top: 1px solid var(--glass-border);
-            padding-bottom: env(safe-area-inset-bottom, 1rem);
+            padding-bottom: calc(2.5rem + env(safe-area-inset-bottom, 0px));
         }
         .numpad-3col {
             grid-template-columns: repeat(3, 1fr);
