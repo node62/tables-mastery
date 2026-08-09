@@ -19,6 +19,10 @@
             --correct: #10b981;
             --key-bg: #111111;
             --key-active: #222222;
+
+            /* Dynamic Padding Variables */
+            --safe-padding-top: 2.5rem;
+            --safe-padding-bottom: 2.5rem;
         }
 
         * {
@@ -55,7 +59,7 @@
             display: none;
             flex: 1;
             flex-direction: column;
-            padding: 2.5rem 1.5rem;
+            padding: var(--safe-padding-top) 1.5rem var(--safe-padding-bottom) 1.5rem;
             height: 100%;
             overflow-y: auto;
         }
@@ -92,7 +96,7 @@
         .settings-group label {
             font-weight: 600;
         }
-        .settings-group input {
+        .settings-group input[type="number"] {
             background: #000000;
             border: 1px solid var(--glass-border);
             color: white;
@@ -102,6 +106,10 @@
             text-align: center;
             font-size: 1.2rem;
             font-weight: 600;
+        }
+        .settings-group input[type="range"] {
+            width: 150px;
+            accent-color: var(--primary);
         }
 
         .button-group {
@@ -126,6 +134,21 @@
 
         .btn-secondary { background: var(--secondary); border: 1px solid var(--glass-border); color: #ffffff; }
         .btn-secondary:active { background: var(--secondary-hover); transform: scale(0.98); }
+
+        .btn-icon {
+            background: transparent;
+            border: 1px solid var(--glass-border);
+            color: #888;
+            font-size: 1.5rem;
+            width: 3rem;
+            height: 3rem;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .btn-icon:active { background: var(--secondary); }
 
         .btn-back {
             background: transparent;
@@ -225,7 +248,7 @@
         #screen-question.active { display: flex; }
 
         .question-header {
-            padding: 2.5rem 1.5rem 1rem 1.5rem;
+            padding: var(--safe-padding-top) 1.5rem 1rem 1.5rem;
             background: #0a0a0a;
             border-bottom: 1px solid var(--glass-border);
         }
@@ -302,7 +325,7 @@
             padding: 1rem;
             background: #0a0a0a;
             border-top: 1px solid var(--glass-border);
-            padding-bottom: calc(2.5rem + env(safe-area-inset-bottom, 0px));
+            padding-bottom: var(--safe-padding-bottom);
         }
         .numpad-3col {
             grid-template-columns: repeat(3, 1fr);
@@ -351,13 +374,37 @@
 
     <!-- HOME SCREEN -->
     <section id="screen-home" class="screen active">
-        <div class="glass-panel text-center">
+        <div style="display: flex; justify-content: flex-end;">
+            <button class="btn-icon" onclick="app.navTo('screen-settings')" title="Settings">&#9881;</button>
+        </div>
+        <div class="glass-panel text-center" style="margin-top: 2rem;">
             <h1>Tables Mastery</h1>
             <p class="subtitle">12 to 19 Multiplication</p>
             
             <div class="button-group mt-4">
                 <button class="btn btn-primary" onclick="app.navTo('screen-practice-setup')">Practice Mode</button>
                 <button class="btn btn-secondary" onclick="app.navTo('screen-quiz-setup')">Quiz Mode</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- SETTINGS SCREEN -->
+    <section id="screen-settings" class="screen">
+        <div class="glass-panel">
+            <button class="btn-back" onclick="app.navTo('screen-home')">&larr; Back</button>
+            <h2>Settings</h2>
+            
+            <p class="mb-2" style="color: var(--primary);">Adjust Layout Padding</p>
+            <p style="font-size: 0.9rem; color: #888; margin-bottom: 1.5rem;">Use this if your mobile browser's top address bar or bottom swipe bar is covering the buttons.</p>
+            
+            <div class="settings-group">
+                <label>Top Padding (rem):</label>
+                <input type="range" id="pad-top" min="0" max="10" step="0.5" value="2.5" oninput="app.updatePadding()">
+            </div>
+
+            <div class="settings-group">
+                <label>Bottom Padding (rem):</label>
+                <input type="range" id="pad-bottom" min="0" max="10" step="0.5" value="2.5" oninput="app.updatePadding()">
             </div>
         </div>
     </section>
@@ -546,8 +593,31 @@
             },
 
             init() {
+                this.loadPadding();
                 this.renderMatrices();
                 this.initKeyboard();
+            },
+
+            loadPadding() {
+                const top = localStorage.getItem('safePaddingTop') || '2.5';
+                const bottom = localStorage.getItem('safePaddingBottom') || '2.5';
+                
+                document.getElementById('pad-top').value = top;
+                document.getElementById('pad-bottom').value = bottom;
+                
+                document.documentElement.style.setProperty('--safe-padding-top', top + 'rem');
+                document.documentElement.style.setProperty('--safe-padding-bottom', bottom + 'rem');
+            },
+
+            updatePadding() {
+                const top = document.getElementById('pad-top').value;
+                const bottom = document.getElementById('pad-bottom').value;
+                
+                document.documentElement.style.setProperty('--safe-padding-top', top + 'rem');
+                document.documentElement.style.setProperty('--safe-padding-bottom', bottom + 'rem');
+                
+                localStorage.setItem('safePaddingTop', top);
+                localStorage.setItem('safePaddingBottom', bottom);
             },
 
             initKeyboard() {
