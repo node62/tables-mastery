@@ -318,6 +318,19 @@
         }
         .feedback-overlay.correct-anim { background: radial-gradient(circle, rgba(16,185,129,0.3) 0%, transparent 70%); opacity: 1; }
 
+        /* Padding Indicators */
+        .padding-indicator {
+            position: fixed;
+            left: 0;
+            right: 0;
+            background-color: rgba(239, 68, 68, 0.3);
+            pointer-events: none;
+            z-index: 9999;
+            display: none;
+        }
+        #padding-indicator-top { top: 0; height: var(--safe-padding-top); border-bottom: 2px dashed #ef4444; }
+        #padding-indicator-bottom { bottom: 0; height: var(--safe-padding-bottom); border-top: 2px dashed #ef4444; }
+
         /* Custom Numpad */
         .numpad {
             display: grid;
@@ -517,6 +530,10 @@
         </div>
     </section>
 
+    <!-- PADDING INDICATORS -->
+    <div id="padding-indicator-top" class="padding-indicator"></div>
+    <div id="padding-indicator-bottom" class="padding-indicator"></div>
+
     <script>
         // --- Audio System (Web Audio API) ---
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -572,6 +589,11 @@
             navTo(screenId) {
                 document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
                 document.getElementById(screenId).classList.add('active');
+                
+                const displayStyle = (screenId === 'screen-settings') ? 'block' : 'none';
+                document.getElementById('padding-indicator-top').style.display = displayStyle;
+                document.getElementById('padding-indicator-bottom').style.display = displayStyle;
+
                 if (screenId === 'screen-home') {
                     this.mode = null;
                     this.resetState();
