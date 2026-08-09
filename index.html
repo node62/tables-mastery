@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#000000">
+    <title>Tables Mastery</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #000000;
+            --text-color: #ffffff;
+            --glass-bg: #0a0a0a;
+            --glass-border: #222222;
+            --primary: #facc15;
+            --primary-hover: #eab308;
+            --secondary: #1a1a1a;
+            --secondary-hover: #2a2a2a;
+            --correct: #10b981;
+            --key-bg: #111111;
+            --key-active: #222222;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Outfit', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Utilities */
+        .text-center { text-align: center; }
+        .mt-4 { margin-top: 1rem; }
+        .mb-2 { margin-bottom: 0.5rem; }
+        .w-full { width: 100%; }
+
+        /* Typography */
+        h1 { font-size: 2.5rem; font-weight: 800; margin-bottom: 0.5rem; color: var(--primary); }
+        h2 { font-size: 1.8rem; font-weight: 600; margin-bottom: 1rem; }
+        .subtitle { color: #888888; margin-bottom: 2rem; font-size: 1.1rem; }
+
+        /* Screens */
+        .screen {
+            display: none;
+            flex: 1;
+            flex-direction: column;
+            padding: 1.5rem;
+            height: 100%;
+            overflow-y: auto;
+        }
+
+        .screen.active {
+            display: flex;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Glass Panels (Matte Theme) */
+        .glass-panel {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 1rem;
+            padding: 2rem;
+            margin: auto 0;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.8);
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Forms & Buttons */
+        .settings-group {
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .settings-group label {
+            font-weight: 600;
+        }
+        .settings-group input {
+            background: #000000;
+            border: 1px solid var(--glass-border);
+            color: white;
+            padding: 0.5rem;
+            border-radius: 0.5rem;
+            width: 70px;
+            text-align: center;
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .button-group {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .btn {
+            padding: 1rem;
+            border: none;
+            border-radius: 0.75rem;
+            font-size: 1.2rem;
+            font-weight: 800;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: #000000;
+        }
+
+        .btn-primary { background: var(--primary); }
+        .btn-primary:active { background: var(--primary-hover); transform: scale(0.98); }
+
+        .btn-secondary { background: var(--secondary); border: 1px solid var(--glass-border); color: #ffffff; }
+        .btn-secondary:active { background: var(--secondary-hover); transform: scale(0.98); }
+
+        .btn-back {
+            background: transparent;
+            border: none;
+            color: #888888;
+            font-size: 1rem;
+            margin-bottom: 1.5rem;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            align-self: flex-start;
+        }
+
+        /* Matrix Grid */
+        .matrix-grid {
+            display: grid;
+            grid-template-columns: auto repeat(4, 1fr);
+            gap: 0.5rem;
+            align-items: center;
+            margin-top: 1rem;
+        }
+
+        .matrix-header {
+            color: #888888;
+            font-weight: 800;
+            text-align: center;
+            font-size: 1.1rem;
+        }
+
+        .matrix-row-label {
+            color: #ffffff;
+            font-weight: 800;
+            font-size: 1.1rem;
+            text-align: right;
+            padding-right: 0.5rem;
+        }
+
+        .matrix-cell {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .circle-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: 2px solid var(--primary);
+            background: transparent;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.2s;
+            color: transparent;
+        }
+        .circle-btn:active {
+            transform: scale(0.9);
+        }
+
+        /* Practice Completed State */
+        .circle-btn.completed {
+            background: var(--primary);
+            color: #000000;
+        }
+        .circle-btn.completed::after {
+            content: '✓';
+            font-size: 1.2rem;
+            font-weight: 800;
+        }
+
+        /* Quiz Selected State */
+        .circle-btn.selected {
+            background: var(--primary);
+            color: #000000;
+        }
+        .circle-btn.selected::after {
+            content: '✓';
+            font-size: 1.2rem;
+            font-weight: 800;
+        }
+
+        /* Study Content */
+        .study-content {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 0.5rem;
+            font-size: 1.4rem;
+            text-align: center;
+            max-height: 50vh;
+            overflow-y: auto;
+            padding: 1rem 0;
+        }
+
+        /* Question Phase */
+        #screen-question { padding: 0; display: none; flex-direction: column; background-color: #000000; }
+        #screen-question.active { display: flex; }
+
+        .question-header {
+            padding: 1rem 1.5rem;
+            background: #0a0a0a;
+            border-bottom: 1px solid var(--glass-border);
+        }
+        .timer-bar {
+            height: 6px;
+            background: #222222;
+            border-radius: 3px;
+            overflow: hidden;
+            margin-bottom: 0.75rem;
+        }
+        .timer-fill {
+            height: 100%;
+            background: var(--primary);
+            width: 100%;
+            transition: width 0.1s linear, background-color 0.3s;
+        }
+        .stats-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 1.1rem;
+            color: #888888;
+        }
+
+        .btn-escape {
+            background: #111111;
+            color: #888888;
+            border: 1px solid var(--glass-border);
+            border-radius: 0.5rem;
+            padding: 0.25rem 0.75rem;
+            font-size: 0.9rem;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        .btn-escape:active {
+            background: #ef4444;
+            color: white;
+        }
+
+        .question-display {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 4rem;
+            font-weight: 800;
+        }
+        .answer-input {
+            min-height: 5rem;
+            color: var(--primary);
+            margin-top: 1rem;
+        }
+        .blink-caret::after {
+            content: '|';
+            animation: blink 1s step-end infinite;
+        }
+        @keyframes blink { 50% { opacity: 0; } }
+
+        .feedback-overlay {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.2s;
+            z-index: 10;
+        }
+        .feedback-overlay.correct-anim { background: radial-gradient(circle, rgba(16,185,129,0.3) 0%, transparent 70%); opacity: 1; }
+
+        /* Custom Numpad */
+        .numpad {
+            display: grid;
+            gap: 0.5rem;
+            padding: 1rem;
+            background: #0a0a0a;
+            border-top: 1px solid var(--glass-border);
+            padding-bottom: env(safe-area-inset-bottom, 1rem);
+        }
+        .numpad-3col {
+            grid-template-columns: repeat(3, 1fr);
+        }
+
+        .num-key {
+            background: var(--key-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 0.5rem;
+            color: white;
+            font-size: 2rem;
+            font-weight: 600;
+            padding: 1.25rem 0;
+            cursor: pointer;
+            transition: background 0.1s;
+        }
+        .num-key:active { background: var(--key-active); }
+        .spacer-key { background: transparent; border: none; cursor: default; }
+        .spacer-key:active { background: transparent; }
+        .action-key { font-size: 1.3rem; }
+        .delete-key { background: #1a1a1a; color: #888888; }
+        .delete-key:active { background: #ef4444; color: white; }
+
+        /* Summary */
+        .summary-stats {
+            display: flex;
+            justify-content: space-around;
+            margin: 2rem 0;
+        }
+        .stat-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 1rem;
+            background: #111111;
+            border-radius: 0.75rem;
+            min-width: 80px;
+            border: 1px solid var(--glass-border);
+        }
+        .stat-label { font-size: 0.9rem; color: #888888; text-transform: uppercase; letter-spacing: 1px; font-weight: 600; }
+        .stat-value { font-size: 2rem; font-weight: 800; margin-top: 0.5rem; }
+        .stat-box.correct .stat-value { color: var(--correct); }
+    </style>
+</head>
+<body>
+
+    <!-- HOME SCREEN -->
+    <section id="screen-home" class="screen active">
+        <div class="glass-panel text-center">
+            <h1>Tables Mastery</h1>
+            <p class="subtitle">12 to 19 Multiplication</p>
+            
+            <div class="button-group mt-4">
+                <button class="btn btn-primary" onclick="app.navTo('screen-practice-setup')">Practice Mode</button>
+                <button class="btn btn-secondary" onclick="app.navTo('screen-quiz-setup')">Quiz Mode</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- PRACTICE SETUP SCREEN -->
+    <section id="screen-practice-setup" class="screen">
+        <div class="glass-panel">
+            <button class="btn-back" onclick="app.navTo('screen-home')">&larr; Back</button>
+            <h2>Practice Mode</h2>
+            
+            <div class="settings-group">
+                <label for="repetitions">Repetitions per fact:</label>
+                <input type="number" id="repetitions" value="2" min="1" max="10">
+            </div>
+
+            <p class="mb-2">Select a challenge to learn:</p>
+            
+            <div class="matrix-grid" id="practice-matrix">
+                <!-- Populated by JS -->
+            </div>
+        </div>
+    </section>
+
+    <!-- QUIZ SETUP SCREEN -->
+    <section id="screen-quiz-setup" class="screen">
+        <div class="glass-panel">
+            <button class="btn-back" onclick="app.navTo('screen-home')">&larr; Back</button>
+            <h2>Quiz Mode</h2>
+            
+            <div class="settings-group">
+                <label for="quiz-limit">Number of Questions:</label>
+                <input type="number" id="quiz-limit" value="10" min="1" max="100">
+            </div>
+
+            <p class="mb-2">Select sections to test on:</p>
+            
+            <div class="matrix-grid" id="quiz-matrix">
+                <!-- Populated by JS -->
+            </div>
+
+            <button class="btn btn-primary mt-4 w-full" onclick="app.startQuiz()">Start Quiz</button>
+        </div>
+    </section>
+
+    <!-- STUDY PHASE SCREEN -->
+    <section id="screen-study" class="screen">
+        <div class="glass-panel">
+            <button class="btn-back" onclick="app.abortSession()">&larr; Quit</button>
+            <h2>Study Table</h2>
+            <div id="study-content" class="study-content">
+                <!-- Populated by JS -->
+            </div>
+            <button class="btn btn-primary mt-4 w-full" onclick="app.startQuestions()">I'm Ready</button>
+        </div>
+    </section>
+
+    <!-- QUESTION PHASE SCREEN -->
+    <section id="screen-question" class="screen">
+        <div class="question-header">
+            <div class="timer-bar"><div class="timer-fill" id="timer-fill"></div></div>
+            <div class="stats-row">
+                <button class="btn-escape" onclick="app.abortSession()">&#x2715; Quit</button>
+                <span id="question-counter">Q: 1/10</span>
+                <span id="question-timer" class="time-text">0.0s</span>
+            </div>
+        </div>
+
+        <div class="question-display">
+            <div id="question-text" class="question-text">12 x 5 = ?</div>
+            <div id="answer-input" class="answer-input blink-caret"></div>
+        </div>
+
+        <div id="feedback-overlay" class="feedback-overlay"></div>
+
+        <!-- CUSTOM NUMPAD (No ENT key) -->
+        <div class="numpad numpad-3col">
+            <button class="num-key" onclick="app.numpadPress(7)">7</button>
+            <button class="num-key" onclick="app.numpadPress(8)">8</button>
+            <button class="num-key" onclick="app.numpadPress(9)">9</button>
+            <button class="num-key" onclick="app.numpadPress(4)">4</button>
+            <button class="num-key" onclick="app.numpadPress(5)">5</button>
+            <button class="num-key" onclick="app.numpadPress(6)">6</button>
+            <button class="num-key" onclick="app.numpadPress(1)">1</button>
+            <button class="num-key" onclick="app.numpadPress(2)">2</button>
+            <button class="num-key" onclick="app.numpadPress(3)">3</button>
+            <button class="num-key spacer-key"></button>
+            <button class="num-key" onclick="app.numpadPress(0)">0</button>
+            <button class="num-key action-key delete-key" onclick="app.numpadDelete()">DEL</button>
+        </div>
+    </section>
+
+    <!-- SUMMARY SCREEN -->
+    <section id="screen-summary" class="screen">
+        <div class="glass-panel text-center">
+            <button class="btn-back" onclick="app.navTo('screen-home')" style="align-self: flex-start;">&larr; Home</button>
+            <h2>Session Complete!</h2>
+            
+            <div class="summary-stats">
+                <div class="stat-box">
+                    <span class="stat-label">Time</span>
+                    <span class="stat-value" id="summary-time">0s</span>
+                </div>
+                <div class="stat-box correct">
+                    <span class="stat-label">Right</span>
+                    <span class="stat-value" id="summary-right">0</span>
+                </div>
+            </div>
+
+            <button class="btn btn-primary mt-4 w-full" onclick="app.navTo('screen-home')">Finish</button>
+        </div>
+    </section>
+
+    <script>
+        // --- Audio System (Web Audio API) ---
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        function playTone(freq, type, duration, vol=0.1) {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = type;
+            osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+            
+            gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+            
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + duration);
+        }
+
+        function playCorrect() {
+            playTone(600, 'sine', 0.1);
+            setTimeout(() => playTone(800, 'sine', 0.15), 100);
+        }
+
+        function playEnd() {
+            playTone(400, 'square', 0.1);
+            setTimeout(() => playTone(500, 'square', 0.1), 150);
+            setTimeout(() => playTone(600, 'square', 0.2), 300);
+            setTimeout(() => playTone(800, 'square', 0.4), 450);
+        }
+
+        // --- App State ---
+        const app = {
+            mode: null,
+            batches: ['2-5', '6-9', '11-15', '16-20'],
+            numbers: [12, 13, 14, 15, 16, 17, 18, 19],
+            
+            quizSelections: new Set(),
+            currentPracticeChallenge: null,
+
+            questions: [],
+            currentQIndex: 0,
+            currentInput: "",
+            
+            stats: {
+                totalTime: 0,
+                right: 0,
+                questionStartTime: 0,
+                animFrame: null
+            },
+
+            navTo(screenId) {
+                document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
+                document.getElementById(screenId).classList.add('active');
+                if (screenId === 'screen-home') {
+                    this.mode = null;
+                    this.resetState();
+                    this.renderMatrices();
+                }
+            },
+
+            resetState() {
+                this.currentInput = "";
+                this.questions = [];
+                this.currentQIndex = 0;
+                this.stats = { totalTime: 0, right: 0, questionStartTime: 0, animFrame: null };
+                this.updateInputDisplay();
+            },
+
+            abortSession() {
+                if (this.stats.animFrame) cancelAnimationFrame(this.stats.animFrame);
+                this.navTo('screen-home');
+            },
+
+            init() {
+                this.renderMatrices();
+                this.initKeyboard();
+            },
+
+            initKeyboard() {
+                window.addEventListener('keydown', (e) => {
+                    const questionScreen = document.getElementById('screen-question');
+                    if (!questionScreen.classList.contains('active')) return;
+
+                    if (e.key >= '0' && e.key <= '9') {
+                        this.numpadPress(parseInt(e.key));
+                    } else if (e.key === 'Backspace' || e.key === 'Delete') {
+                        this.numpadDelete();
+                    }
+                });
+            },
+
+            checkCompleted(num, batch) {
+                return localStorage.getItem(`practice_${num}_${batch}`) === 'true';
+            },
+
+            setCompleted(num, batch) {
+                localStorage.setItem(`practice_${num}_${batch}`, 'true');
+            },
+
+            renderMatrices() {
+                const pGrid = document.getElementById('practice-matrix');
+                const qGrid = document.getElementById('quiz-matrix');
+                
+                let headerHtml = `<div class="matrix-cell"></div>`;
+                this.batches.forEach(b => {
+                    headerHtml += `<div class="matrix-header">${b}</div>`;
+                });
+
+                let pHtml = headerHtml;
+                let qHtml = headerHtml;
+
+                this.numbers.forEach(n => {
+                    pHtml += `<div class="matrix-row-label">${n}</div>`;
+                    qHtml += `<div class="matrix-row-label">${n}</div>`;
+
+                    this.batches.forEach(b => {
+                        let isCompleted = this.checkCompleted(n, b);
+                        
+                        // Practice Button
+                        let pClass = isCompleted ? 'circle-btn completed' : 'circle-btn';
+                        pHtml += `
+                            <div class="matrix-cell">
+                                <button class="${pClass}" onclick="app.startPractice(${n}, '${b}')"></button>
+                            </div>`;
+
+                        // Quiz Button
+                        let isSelected = this.quizSelections.has(`${n}_${b}`);
+                        let qClass = isSelected ? 'circle-btn selected' : 'circle-btn';
+                        qHtml += `
+                            <div class="matrix-cell">
+                                <button class="${qClass}" onclick="app.toggleQuizSelection(${n}, '${b}')"></button>
+                            </div>`;
+                    });
+                });
+
+                pGrid.innerHTML = pHtml;
+                qGrid.innerHTML = qHtml;
+            },
+
+            toggleQuizSelection(num, batch) {
+                let key = `${num}_${batch}`;
+                if (this.quizSelections.has(key)) {
+                    this.quizSelections.delete(key);
+                } else {
+                    this.quizSelections.add(key);
+                }
+                this.renderMatrices();
+            },
+
+            getMultipliersFromBatch(batchStr) {
+                let parts = batchStr.split('-');
+                let start = parseInt(parts[0]);
+                let end = parseInt(parts[1]);
+                let res = [];
+                for(let i=start; i<=end; i++) res.push(i);
+                return res;
+            },
+
+            shuffle(array) {
+                for (let i = array.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [array[i], array[j]] = [array[j], array[i]];
+                }
+            },
+
+            startPractice(num, batch) {
+                this.mode = 'practice';
+                this.currentPracticeChallenge = { num, batch };
+                this.resetState();
+
+                let multipliers = this.getMultipliersFromBatch(batch);
+                let reps = parseInt(document.getElementById('repetitions').value) || 2;
+                
+                for (let i=0; i<reps; i++) {
+                    let temp = [...multipliers];
+                    this.shuffle(temp);
+                    temp.forEach(m => {
+                        this.questions.push({ n1: num, n2: m, ans: num * m });
+                    });
+                }
+
+                // Show study screen first
+                let studyHtml = '';
+                multipliers.sort((a,b)=>a-b).forEach(m => {
+                    studyHtml += `<div>${num} x ${m} = <span style="color:var(--primary)">${num * m}</span></div>`;
+                });
+                document.getElementById('study-content').innerHTML = studyHtml;
+                this.navTo('screen-study');
+            },
+
+            startQuiz() {
+                if (this.quizSelections.size === 0) {
+                    alert("Please select at least one section in the grid.");
+                    return;
+                }
+                this.mode = 'quiz';
+                this.resetState();
+
+                let allPotentialQ = [];
+                this.quizSelections.forEach(key => {
+                    let parts = key.split('_');
+                    let num = parseInt(parts[0]);
+                    let batch = parts[1];
+                    let multipliers = this.getMultipliersFromBatch(batch);
+                    
+                    multipliers.forEach(m => {
+                        allPotentialQ.push({ n1: num, n2: m, ans: num * m });
+                    });
+                });
+
+                this.shuffle(allPotentialQ);
+
+                let limit = parseInt(document.getElementById('quiz-limit').value) || 10;
+                
+                while (this.questions.length < limit) {
+                    let temp = [...allPotentialQ];
+                    this.shuffle(temp);
+                    for (let i=0; i < temp.length && this.questions.length < limit; i++) {
+                        this.questions.push(temp[i]);
+                    }
+                }
+
+                this.startQuestions();
+            },
+
+            startQuestions() {
+                if (this.questions.length === 0) return;
+                this.navTo('screen-question');
+                this.loadQuestion();
+            },
+
+            loadQuestion() {
+                if (this.currentQIndex >= this.questions.length) {
+                    this.finishSession();
+                    return;
+                }
+                this.currentInput = "";
+                this.updateInputDisplay();
+                
+                let q = this.questions[this.currentQIndex];
+                let text = Math.random() > 0.5 ? `${q.n1} x ${q.n2}` : `${q.n2} x ${q.n1}`;
+                document.getElementById('question-text').innerText = `${text} = ?`;
+                document.getElementById('question-counter').innerText = `Q: ${this.currentQIndex + 1}/${this.questions.length}`;
+                
+                this.startTimer();
+            },
+
+            startTimer() {
+                this.stats.questionStartTime = Date.now();
+                const timerText = document.getElementById('question-timer');
+                const timerFill = document.getElementById('timer-fill');
+                
+                const update = () => {
+                    let elapsed = (Date.now() - this.stats.questionStartTime) / 1000;
+                    timerText.innerText = elapsed.toFixed(1) + 's';
+                    
+                    let pct = Math.max(0, 100 - (elapsed / 15 * 100));
+                    timerFill.style.width = pct + '%';
+                    
+                    if (elapsed > 10) timerFill.style.background = '#ef4444'; 
+                    else if (elapsed > 5) timerFill.style.background = '#f59e0b';
+                    else timerFill.style.background = 'var(--primary)';
+
+                    this.stats.animFrame = requestAnimationFrame(update);
+                };
+                update();
+            },
+
+            stopTimer() {
+                cancelAnimationFrame(this.stats.animFrame);
+                let elapsed = (Date.now() - this.stats.questionStartTime) / 1000;
+                this.stats.totalTime += elapsed;
+            },
+
+            numpadPress(num) {
+                if (this.currentInput.length < 4) {
+                    this.currentInput += num.toString();
+                    this.updateInputDisplay();
+                    this.checkAnswer();
+                }
+            },
+
+            numpadDelete() {
+                if (this.currentInput.length > 0) {
+                    this.currentInput = this.currentInput.slice(0, -1);
+                    this.updateInputDisplay();
+                }
+            },
+
+            updateInputDisplay() {
+                document.getElementById('answer-input').innerText = this.currentInput;
+            },
+
+            checkAnswer() {
+                let q = this.questions[this.currentQIndex];
+                let val = parseInt(this.currentInput);
+                
+                if (val === q.ans) {
+                    this.stopTimer();
+                    this.stats.right++;
+                    playCorrect();
+                    
+                    const overlay = document.getElementById('feedback-overlay');
+                    overlay.className = 'feedback-overlay correct-anim';
+                    
+                    setTimeout(() => {
+                        overlay.className = 'feedback-overlay';
+                        this.currentQIndex++;
+                        this.loadQuestion();
+                    }, 300);
+                }
+            },
+
+            finishSession() {
+                playEnd();
+                
+                if (this.mode === 'practice' && this.currentPracticeChallenge) {
+                    this.setCompleted(this.currentPracticeChallenge.num, this.currentPracticeChallenge.batch);
+                    this.renderMatrices();
+                }
+
+                this.navTo('screen-summary');
+                
+                document.getElementById('summary-time').innerText = this.stats.totalTime.toFixed(1) + 's';
+                document.getElementById('summary-right').innerText = this.stats.right;
+            }
+        };
+
+        window.onload = () => {
+            app.init();
+        };
+    </script>
+</body>
+</html>
