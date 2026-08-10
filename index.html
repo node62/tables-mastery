@@ -472,7 +472,7 @@
             
             <div class="settings-group">
                 <label for="repetitions">Repetitions per fact:</label>
-                <input type="number" id="repetitions" value="2" min="1" max="10">
+                <input type="number" id="repetitions" value="2" min="1" max="10" onchange="app.updateSettings()">
             </div>
 
             <p class="mb-2">Select a challenge to learn:</p>
@@ -491,16 +491,16 @@
             
             <div class="settings-group">
                 <label for="quiz-limit">Number of Questions:</label>
-                <input type="number" id="quiz-limit" value="10" min="1" max="100">
+                <input type="number" id="quiz-limit" value="10" min="1" max="100" onchange="app.updateSettings()">
             </div>
 
             <div class="settings-group" style="margin-bottom: 0.5rem;">
                 <label for="quiz-include-2">Include x2</label>
-                <input type="checkbox" id="quiz-include-2" checked>
+                <input type="checkbox" id="quiz-include-2" checked onchange="app.updateSettings()">
             </div>
             <div class="settings-group">
                 <label for="quiz-include-5">Include x5</label>
-                <input type="checkbox" id="quiz-include-5" checked>
+                <input type="checkbox" id="quiz-include-5" checked onchange="app.updateSettings()">
             </div>
 
             <p class="mb-2">Select sections to test on:</p>
@@ -521,7 +521,7 @@
             
             <div class="settings-group">
                 <label for="percentage-limit">Number of Questions:</label>
-                <input type="number" id="percentage-limit" value="10" min="1" max="100">
+                <input type="number" id="percentage-limit" value="10" min="1" max="100" onchange="app.updateSettings()">
             </div>
 
             <p class="mb-2">Select difficulty:</p>
@@ -727,6 +727,21 @@
                 document.getElementById('sound-times-up').checked = this.soundTimesUpEnabled;
                 
                 this.applyTimerSettings();
+                
+                const reps = localStorage.getItem('repetitions');
+                if (reps !== null) document.getElementById('repetitions').value = reps;
+                
+                const qLimit = localStorage.getItem('quizLimit');
+                if (qLimit !== null) document.getElementById('quiz-limit').value = qLimit;
+                
+                const pLimit = localStorage.getItem('percentageLimit');
+                if (pLimit !== null) document.getElementById('percentage-limit').value = pLimit;
+
+                const inc2 = localStorage.getItem('quizInclude2');
+                if (inc2 !== null) document.getElementById('quiz-include-2').checked = inc2 === 'true';
+
+                const inc5 = localStorage.getItem('quizInclude5');
+                if (inc5 !== null) document.getElementById('quiz-include-5').checked = inc5 === 'true';
             },
 
             updateSettings() {
@@ -745,6 +760,13 @@
                 localStorage.setItem('hideTimerNum', this.hideTimerNum);
                 localStorage.setItem('hideTimerBar', this.hideTimerBar);
                 localStorage.setItem('soundTimesUpEnabled', this.soundTimesUpEnabled);
+                
+                localStorage.setItem('repetitions', document.getElementById('repetitions').value);
+                localStorage.setItem('quizLimit', document.getElementById('quiz-limit').value);
+                localStorage.setItem('percentageLimit', document.getElementById('percentage-limit').value);
+                localStorage.setItem('quizInclude2', document.getElementById('quiz-include-2').checked);
+                localStorage.setItem('quizInclude5', document.getElementById('quiz-include-5').checked);
+                
                 this.applyTimerSettings();
             },
 
