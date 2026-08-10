@@ -409,6 +409,7 @@
                 <button class="btn btn-primary" onpointerdown="app.navTo('screen-practice-setup')">Practice Mode</button>
                 <button class="btn btn-secondary" onpointerdown="app.navTo('screen-quiz-setup')">Quiz Mode</button>
                 <button class="btn btn-secondary" onpointerdown="app.navTo('screen-percentage-setup')">Percentage Mode</button>
+                <button class="btn btn-secondary" onpointerdown="app.navTo('screen-powers-setup')">Squares & Cubes Mode</button>
             </div>
         </div>
     </section>
@@ -531,6 +532,49 @@
                 <button class="btn btn-secondary" onpointerdown="app.startPercentageQuiz('medium')">Medium (e.g. 2% of 30)</button>
                 <button class="btn btn-secondary" onpointerdown="app.startPercentageQuiz('hard')">Hard (e.g. 15% of 80)</button>
             </div>
+        </div>
+    </section>
+
+    <!-- POWERS SETUP SCREEN -->
+    <section id="screen-powers-setup" class="screen">
+        <div class="glass-panel">
+            <button class="btn-back" onpointerdown="app.navTo('screen-home')">&larr; Back</button>
+            <h2>Squares & Cubes</h2>
+            
+            <div class="settings-group">
+                <label for="powers-limit">Number of Questions:</label>
+                <input type="number" id="powers-limit" value="10" min="1" max="100" onchange="app.updateSettings()">
+            </div>
+
+            <hr style="border: 1px solid var(--glass-border); margin: 1rem 0;">
+
+            <div class="settings-group" style="margin-bottom: 0.5rem;">
+                <label for="powers-include-squares" style="color: var(--primary);">Include Squares</label>
+                <input type="checkbox" id="powers-include-squares" checked onchange="app.updateSettings()">
+            </div>
+            <div class="settings-group" style="margin-bottom: 0.5rem;">
+                <label>Range (Min/Max):</label>
+                <div style="display: flex; gap: 0.5rem;">
+                    <input type="number" id="powers-squares-min" value="1" min="1" max="100" onchange="app.updateSettings()">
+                    <input type="number" id="powers-squares-max" value="30" min="1" max="100" onchange="app.updateSettings()">
+                </div>
+            </div>
+
+            <hr style="border: 1px solid var(--glass-border); margin: 1rem 0;">
+
+            <div class="settings-group" style="margin-bottom: 0.5rem;">
+                <label for="powers-include-cubes" style="color: var(--primary);">Include Cubes</label>
+                <input type="checkbox" id="powers-include-cubes" checked onchange="app.updateSettings()">
+            </div>
+            <div class="settings-group">
+                <label>Range (Min/Max):</label>
+                <div style="display: flex; gap: 0.5rem;">
+                    <input type="number" id="powers-cubes-min" value="1" min="1" max="50" onchange="app.updateSettings()">
+                    <input type="number" id="powers-cubes-max" value="15" min="1" max="50" onchange="app.updateSettings()">
+                </div>
+            </div>
+
+            <button class="btn btn-primary mt-4 w-full" onpointerdown="app.startPowersQuiz()">Start Quiz</button>
         </div>
     </section>
 
@@ -742,6 +786,27 @@
 
                 const inc5 = localStorage.getItem('quizInclude5');
                 if (inc5 !== null) document.getElementById('quiz-include-5').checked = inc5 === 'true';
+
+                const pwrLimit = localStorage.getItem('powersLimit');
+                if (pwrLimit !== null) document.getElementById('powers-limit').value = pwrLimit;
+
+                const pwrSqInc = localStorage.getItem('powersIncludeSquares');
+                if (pwrSqInc !== null) document.getElementById('powers-include-squares').checked = pwrSqInc === 'true';
+                
+                const pwrCbInc = localStorage.getItem('powersIncludeCubes');
+                if (pwrCbInc !== null) document.getElementById('powers-include-cubes').checked = pwrCbInc === 'true';
+
+                const pwrSqMin = localStorage.getItem('powersSquaresMin');
+                if (pwrSqMin !== null) document.getElementById('powers-squares-min').value = pwrSqMin;
+                
+                const pwrSqMax = localStorage.getItem('powersSquaresMax');
+                if (pwrSqMax !== null) document.getElementById('powers-squares-max').value = pwrSqMax;
+                
+                const pwrCbMin = localStorage.getItem('powersCubesMin');
+                if (pwrCbMin !== null) document.getElementById('powers-cubes-min').value = pwrCbMin;
+                
+                const pwrCbMax = localStorage.getItem('powersCubesMax');
+                if (pwrCbMax !== null) document.getElementById('powers-cubes-max').value = pwrCbMax;
             },
 
             updateSettings() {
@@ -766,6 +831,14 @@
                 localStorage.setItem('percentageLimit', document.getElementById('percentage-limit').value);
                 localStorage.setItem('quizInclude2', document.getElementById('quiz-include-2').checked);
                 localStorage.setItem('quizInclude5', document.getElementById('quiz-include-5').checked);
+                
+                localStorage.setItem('powersLimit', document.getElementById('powers-limit').value);
+                localStorage.setItem('powersIncludeSquares', document.getElementById('powers-include-squares').checked);
+                localStorage.setItem('powersIncludeCubes', document.getElementById('powers-include-cubes').checked);
+                localStorage.setItem('powersSquaresMin', document.getElementById('powers-squares-min').value);
+                localStorage.setItem('powersSquaresMax', document.getElementById('powers-squares-max').value);
+                localStorage.setItem('powersCubesMin', document.getElementById('powers-cubes-min').value);
+                localStorage.setItem('powersCubesMax', document.getElementById('powers-cubes-max').value);
                 
                 this.applyTimerSettings();
             },
@@ -1019,6 +1092,54 @@
                 this.startQuestions();
             },
 
+            startPowersQuiz() {
+                let includeSquares = document.getElementById('powers-include-squares').checked;
+                let sqMin = parseInt(document.getElementById('powers-squares-min').value) || 1;
+                let sqMax = parseInt(document.getElementById('powers-squares-max').value) || 30;
+
+                let includeCubes = document.getElementById('powers-include-cubes').checked;
+                let cbMin = parseInt(document.getElementById('powers-cubes-min').value) || 1;
+                let cbMax = parseInt(document.getElementById('powers-cubes-max').value) || 15;
+
+                if (!includeSquares && !includeCubes) {
+                    alert("Please enable at least squares or cubes.");
+                    return;
+                }
+
+                if (sqMin > sqMax) [sqMin, sqMax] = [sqMax, sqMin];
+                if (cbMin > cbMax) [cbMin, cbMax] = [cbMax, cbMin];
+
+                this.mode = 'powers';
+                this.resetState();
+                let limit = parseInt(document.getElementById('powers-limit').value) || 10;
+                
+                let allPotentialQ = [];
+                
+                if (includeSquares) {
+                    for (let i = sqMin; i <= sqMax; i++) {
+                        allPotentialQ.push({ n1: i, type: 'square', ans: i * i });
+                    }
+                }
+                
+                if (includeCubes) {
+                    for (let i = cbMin; i <= cbMax; i++) {
+                        allPotentialQ.push({ n1: i, type: 'cube', ans: i * i * i });
+                    }
+                }
+
+                this.shuffle(allPotentialQ);
+                
+                while (this.questions.length < limit && allPotentialQ.length > 0) {
+                    let temp = [...allPotentialQ];
+                    this.shuffle(temp);
+                    for (let i = 0; i < temp.length && this.questions.length < limit; i++) {
+                        this.questions.push(temp[i]);
+                    }
+                }
+
+                this.startQuestions();
+            },
+
             startQuestions() {
                 if (this.questions.length === 0) return;
                 this.navTo('screen-question');
@@ -1037,6 +1158,12 @@
                 let text;
                 if (this.mode === 'percentage') {
                     text = `${q.n1}% of ${q.n2}`;
+                } else if (this.mode === 'powers') {
+                    if (q.type === 'square') {
+                        text = `${q.n1}²`;
+                    } else {
+                        text = `${q.n1}³`;
+                    }
                 } else {
                     text = Math.random() > 0.5 ? `${q.n1} x ${q.n2}` : `${q.n2} x ${q.n1}`;
                 }
@@ -1124,7 +1251,7 @@
                         this.currentQIndex++;
                         this.loadQuestion();
                     }, 150); 
-                } else if ((this.mode === 'quiz' || this.mode === 'percentage') && this.currentInput.length === correctAnsStr.length) {
+                } else if ((this.mode === 'quiz' || this.mode === 'percentage' || this.mode === 'powers') && this.currentInput.length === correctAnsStr.length) {
                     this.handleWrongAnswer(false);
                 }
             },
