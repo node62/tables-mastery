@@ -1115,17 +1115,25 @@
                 
                 let allPotentialQ = [];
                 
+                let studyHtml = '';
+                
                 if (includeSquares) {
                     for (let i = sqMin; i <= sqMax; i++) {
-                        allPotentialQ.push({ n1: i, type: 'square', ans: i * i });
+                        let ans = i * i;
+                        allPotentialQ.push({ n1: i, type: 'square', ans: ans });
+                        studyHtml += `<div>${i}² = <span style="color:var(--primary)">${ans}</span></div>`;
                     }
                 }
                 
                 if (includeCubes) {
                     for (let i = cbMin; i <= cbMax; i++) {
-                        allPotentialQ.push({ n1: i, type: 'cube', ans: i * i * i });
+                        let ans = i * i * i;
+                        allPotentialQ.push({ n1: i, type: 'cube', ans: ans });
+                        studyHtml += `<div>${i}³ = <span style="color:var(--primary)">${ans}</span></div>`;
                     }
                 }
+                
+                document.getElementById('study-content').innerHTML = studyHtml;
 
                 this.shuffle(allPotentialQ);
                 
@@ -1137,7 +1145,7 @@
                     }
                 }
 
-                this.startQuestions();
+                this.navTo('screen-study');
             },
 
             startQuestions() {
