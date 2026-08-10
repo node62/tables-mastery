@@ -493,6 +493,15 @@
                 <input type="number" id="quiz-limit" value="10" min="1" max="100">
             </div>
 
+            <div class="settings-group" style="margin-bottom: 0.5rem;">
+                <label for="quiz-include-2">Include x2</label>
+                <input type="checkbox" id="quiz-include-2" checked>
+            </div>
+            <div class="settings-group">
+                <label for="quiz-include-5">Include x5</label>
+                <input type="checkbox" id="quiz-include-5" checked>
+            </div>
+
             <p class="mb-2">Select sections to test on:</p>
             
             <div class="matrix-grid" id="quiz-matrix">
@@ -599,6 +608,13 @@
         function playCorrect() {
             playTone(600, 'sine', 0.1);
             setTimeout(() => playTone(800, 'sine', 0.15), 100);
+        }
+
+        function playWrong() {
+            if (!app.soundEnabled) return;
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            playTone(200, 'sawtooth', 0.1);
+            setTimeout(() => playTone(150, 'sawtooth', 0.2), 100);
         }
 
         function playEnd() {
@@ -889,6 +905,9 @@
                 this.mode = 'quiz';
                 this.resetState();
 
+                let include2 = document.getElementById('quiz-include-2').checked;
+                let include5 = document.getElementById('quiz-include-5').checked;
+
                 let allPotentialQ = [];
                 this.quizSelections.forEach(key => {
                     let parts = key.split('_');
@@ -897,6 +916,8 @@
                     let multipliers = this.getMultipliersFromBatch(batch);
                     
                     multipliers.forEach(m => {
+                        if (!include2 && m === 2) return;
+                        if (!include5 && m === 5) return;
                         allPotentialQ.push({ n1: num, n2: m, ans: num * m });
                     });
                 });
@@ -955,9 +976,12 @@
                     else if (elapsed > 5) timerFill.style.background = '#f59e0b';
                     else timerFill.style.background = 'var(--primary)';
 
-                    if (elapsed > 15 && !this.stats.timeUpPlayed) {
+                    if (elapsed >= 15 && !this.stats.timeUpPlayed) {
                         this.stats.timeUpPlayed = true;
-                        if (this.soundTimesUpEnabled) {
+                        if (this.mode === 'quiz') {
+                            this.handleWrongAnswer(true);
+                            return; // Stop animation frame loop
+                        } else if (this.soundTimesUpEnabled) {
                             playTone(150, 'sawtooth', 0.15, 0.2);
                             setTimeout(() => playTone(100, 'sawtooth', 0.25, 0.2), 150);
                         }
@@ -1013,7 +1037,32 @@
                         this.currentQIndex++;
                         this.loadQuestion();
                     }, 150); 
+                } else if (this.mode === 'quiz' && this.currentInput.length === q.ans.toString().length) {
+                    this.handleWrongAnswer(false);
                 }
+            },
+
+            handleWrongAnswer(isTimeUp) {
+                this.stopTimer();
+                if (!isTimeUp || this.soundTimesUpEnabled) {
+                    playWrong();
+                }
+                
+                const overlay = document.getElementById('feedback-overlay');
+                overlay.style.background = 'radial-gradient(circle, rgba(239,68,68,0.3) 0%, transparent 70%)';
+                overlay.style.opacity = 1;
+                
+                // Spaced repetition: add back to end of queue
+                let q = this.questions[this.currentQIndex];
+                this.questions.push(q);
+                
+                setTimeout(() => {
+                    overlay.style.opacity = 0;
+                    overlay.style.background = '';
+                    overlay.className = 'feedback-overlay';
+                    this.currentQIndex++;
+                    this.loadQuestion();
+                }, 300);
             },
 
             finishSession() {
