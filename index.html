@@ -408,6 +408,7 @@
             <div class="button-group mt-4">
                 <button class="btn btn-primary" onpointerdown="app.navTo('screen-practice-setup')">Practice Mode</button>
                 <button class="btn btn-secondary" onpointerdown="app.navTo('screen-quiz-setup')">Quiz Mode</button>
+                <button class="btn btn-secondary" onpointerdown="app.navTo('screen-percentage-setup')">Percentage Mode</button>
             </div>
         </div>
     </section>
@@ -512,6 +513,27 @@
         </div>
     </section>
 
+    <!-- PERCENTAGE SETUP SCREEN -->
+    <section id="screen-percentage-setup" class="screen">
+        <div class="glass-panel">
+            <button class="btn-back" onpointerdown="app.navTo('screen-home')">&larr; Back</button>
+            <h2>Percentage Mode</h2>
+            
+            <div class="settings-group">
+                <label for="percentage-limit">Number of Questions:</label>
+                <input type="number" id="percentage-limit" value="10" min="1" max="100">
+            </div>
+
+            <p class="mb-2">Select difficulty:</p>
+            
+            <div class="button-group">
+                <button class="btn btn-secondary" onpointerdown="app.startPercentageQuiz('easy')">Easy (e.g. 20% of 60)</button>
+                <button class="btn btn-secondary" onpointerdown="app.startPercentageQuiz('medium')">Medium (e.g. 2% of 30)</button>
+                <button class="btn btn-secondary" onpointerdown="app.startPercentageQuiz('hard')">Hard (e.g. 15% of 80)</button>
+            </div>
+        </div>
+    </section>
+
     <!-- STUDY PHASE SCREEN -->
     <section id="screen-study" class="screen">
         <div class="glass-panel">
@@ -553,7 +575,7 @@
             <button class="num-key" onpointerdown="app.numpadPress(1, event)">1</button>
             <button class="num-key" onpointerdown="app.numpadPress(2, event)">2</button>
             <button class="num-key" onpointerdown="app.numpadPress(3, event)">3</button>
-            <button class="num-key spacer-key"></button>
+            <button class="num-key" onpointerdown="app.numpadPress('.', event)">.</button>
             <button class="num-key" onpointerdown="app.numpadPress(0, event)">0</button>
             <button class="num-key action-key delete-key" onpointerdown="app.numpadDelete(event)">DEL</button>
         </div>
@@ -937,6 +959,44 @@
                 this.startQuestions();
             },
 
+            startPercentageQuiz(difficulty) {
+                this.mode = 'percentage';
+                this.resetState();
+                let limit = parseInt(document.getElementById('percentage-limit').value) || 10;
+                
+                let allPotentialQ = [];
+                for (let i = 0; i < 50; i++) {
+                    let n1, n2;
+                    if (difficulty === 'easy') {
+                        // 10, 20.. 90% of 10, 20.. 100
+                        n1 = (Math.floor(Math.random() * 9) + 1) * 10;
+                        n2 = (Math.floor(Math.random() * 10) + 1) * 10;
+                    } else if (difficulty === 'medium') {
+                        // 1-9% of 10-100
+                        n1 = Math.floor(Math.random() * 9) + 1;
+                        n2 = (Math.floor(Math.random() * 10) + 1) * 10;
+                    } else {
+                        // 11-99% of 10-100
+                        n1 = Math.floor(Math.random() * 89) + 11;
+                        n2 = (Math.floor(Math.random() * 10) + 1) * 10;
+                        if (n1 % 10 === 0) n1 += 1; // avoid easy ones
+                    }
+                    let ans = (n1 * n2) / 100;
+                    
+                    // Format ans so that e.g. 5.4 stays 5.4, no extra long decimals for floating point math
+                    ans = Math.round(ans * 100) / 100;
+                    
+                    allPotentialQ.push({ n1: n1, n2: n2, ans: ans });
+                }
+
+                this.shuffle(allPotentialQ);
+                for (let i=0; i < limit && i < allPotentialQ.length; i++) {
+                    this.questions.push(allPotentialQ[i]);
+                }
+
+                this.startQuestions();
+            },
+
             startQuestions() {
                 if (this.questions.length === 0) return;
                 this.navTo('screen-question');
@@ -952,7 +1012,12 @@
                 this.updateInputDisplay();
                 
                 let q = this.questions[this.currentQIndex];
-                let text = Math.random() > 0.5 ? `${q.n1} x ${q.n2}` : `${q.n2} x ${q.n1}`;
+                let text;
+                if (this.mode === 'percentage') {
+                    text = `${q.n1}% of ${q.n2}`;
+                } else {
+                    text = Math.random() > 0.5 ? `${q.n1} x ${q.n2}` : `${q.n2} x ${q.n1}`;
+                }
                 document.getElementById('question-text').innerText = `${text} = ?`;
                 document.getElementById('question-counter').innerText = `Q: ${this.currentQIndex + 1}/${this.questions.length}`;
                 
@@ -1000,7 +1065,7 @@
 
             numpadPress(num, e) {
                 if(e) e.preventDefault(); // Fast response, stop normal click propagation
-                if (this.currentInput.length < 4) {
+                if (this.currentInput.length < 6) {
                     this.currentInput += num.toString();
                     this.updateInputDisplay();
                     this.checkAnswer();
@@ -1021,9 +1086,9 @@
 
             checkAnswer() {
                 let q = this.questions[this.currentQIndex];
-                let val = parseInt(this.currentInput);
+                let correctAnsStr = q.ans.toString();
                 
-                if (val === q.ans) {
+                if (this.currentInput === correctAnsStr) {
                     this.stopTimer();
                     this.stats.right++;
                     playCorrect();
@@ -1037,7 +1102,7 @@
                         this.currentQIndex++;
                         this.loadQuestion();
                     }, 150); 
-                } else if (this.mode === 'quiz' && this.currentInput.length === q.ans.toString().length) {
+                } else if ((this.mode === 'quiz' || this.mode === 'percentage') && this.currentInput.length === correctAnsStr.length) {
                     this.handleWrongAnswer(false);
                 }
             },
