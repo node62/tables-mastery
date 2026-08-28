@@ -1182,16 +1182,21 @@
                 let limit = parseInt(document.getElementById('fractions-limit').value) || 10;
                 
                 let allPotentialQ = [];
+                let studyHtml = '';
                 
                 if (category === 'unit_1_10' || category === 'all') {
                     for (let i = 2; i <= 10; i++) {
-                        allPotentialQ.push({ n1: 1, n2: i, ans: Math.round((1/i)*10000)/100 });
+                        let ans = Math.round((1/i)*10000)/100;
+                        allPotentialQ.push({ n1: 1, n2: i, ans: ans });
+                        studyHtml += `<div>1 / ${i} = <span style="color:var(--primary)">${ans}%</span></div>`;
                     }
                 }
                 
                 if (category === 'unit_11_20' || category === 'all') {
                     for (let i = 11; i <= 20; i++) {
-                        allPotentialQ.push({ n1: 1, n2: i, ans: Math.round((1/i)*10000)/100 });
+                        let ans = Math.round((1/i)*10000)/100;
+                        allPotentialQ.push({ n1: 1, n2: i, ans: ans });
+                        studyHtml += `<div>1 / ${i} = <span style="color:var(--primary)">${ans}%</span></div>`;
                     }
                 }
 
@@ -1202,10 +1207,14 @@
                         [3, 8], [5, 8], [7, 8]
                     ];
                     commonFractions.forEach(f => {
-                        allPotentialQ.push({ n1: f[0], n2: f[1], ans: Math.round((f[0]/f[1])*10000)/100 });
+                        let ans = Math.round((f[0]/f[1])*10000)/100;
+                        allPotentialQ.push({ n1: f[0], n2: f[1], ans: ans });
+                        studyHtml += `<div>${f[0]} / ${f[1]} = <span style="color:var(--primary)">${ans}%</span></div>`;
                     });
                 }
                 
+                document.getElementById('study-content').innerHTML = studyHtml;
+
                 this.shuffle(allPotentialQ);
                 
                 while (this.questions.length < limit && allPotentialQ.length > 0) {
@@ -1216,7 +1225,7 @@
                     }
                 }
 
-                this.startQuestions();
+                this.navTo('screen-study');
             },
 
             startQuestions() {
