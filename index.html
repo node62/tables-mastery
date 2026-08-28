@@ -410,6 +410,7 @@
                 <button class="btn btn-secondary" onpointerdown="app.navTo('screen-quiz-setup')">Quiz Mode</button>
                 <button class="btn btn-secondary" onpointerdown="app.navTo('screen-percentage-setup')">Percentage Mode</button>
                 <button class="btn btn-secondary" onpointerdown="app.navTo('screen-powers-setup')">Squares & Cubes Mode</button>
+                <button class="btn btn-secondary" onpointerdown="app.navTo('screen-fractions-setup')">Fractions Mode</button>
             </div>
         </div>
     </section>
@@ -575,6 +576,28 @@
             </div>
 
             <button class="btn btn-primary mt-4 w-full" onpointerdown="app.startPowersQuiz()">Start Quiz</button>
+        </div>
+    </section>
+
+    <!-- FRACTIONS SETUP SCREEN -->
+    <section id="screen-fractions-setup" class="screen">
+        <div class="glass-panel">
+            <button class="btn-back" onpointerdown="app.navTo('screen-home')">&larr; Back</button>
+            <h2>Fractions Mode</h2>
+            
+            <div class="settings-group">
+                <label for="fractions-limit">Number of Questions:</label>
+                <input type="number" id="fractions-limit" value="10" min="1" max="100" onchange="app.updateSettings()">
+            </div>
+
+            <p class="mb-2" style="font-size: 0.9rem; color: #888;">Answers should be percentages with up to 2 decimal places (e.g. 33.33 for 1/3, 12.5 for 1/8, 50 for 1/2).</p>
+            
+            <div class="button-group mt-4">
+                <button class="btn btn-secondary" onpointerdown="app.startFractionsQuiz('unit_1_10')">1/2 to 1/10</button>
+                <button class="btn btn-secondary" onpointerdown="app.startFractionsQuiz('unit_11_20')">1/11 to 1/20</button>
+                <button class="btn btn-secondary" onpointerdown="app.startFractionsQuiz('common')">Other Common (2/3, 3/4, 3/8...)</button>
+                <button class="btn btn-primary" onpointerdown="app.startFractionsQuiz('all')">Mix All</button>
+            </div>
         </div>
     </section>
 
@@ -807,6 +830,9 @@
                 
                 const pwrCbMax = localStorage.getItem('powersCubesMax');
                 if (pwrCbMax !== null) document.getElementById('powers-cubes-max').value = pwrCbMax;
+
+                const fracLimit = localStorage.getItem('fractionsLimit');
+                if (fracLimit !== null) document.getElementById('fractions-limit').value = fracLimit;
             },
 
             updateSettings() {
@@ -839,6 +865,8 @@
                 localStorage.setItem('powersSquaresMax', document.getElementById('powers-squares-max').value);
                 localStorage.setItem('powersCubesMin', document.getElementById('powers-cubes-min').value);
                 localStorage.setItem('powersCubesMax', document.getElementById('powers-cubes-max').value);
+                
+                localStorage.setItem('fractionsLimit', document.getElementById('fractions-limit').value);
                 
                 this.applyTimerSettings();
             },
@@ -1148,6 +1176,49 @@
                 this.navTo('screen-study');
             },
 
+            startFractionsQuiz(category) {
+                this.mode = 'fractions';
+                this.resetState();
+                let limit = parseInt(document.getElementById('fractions-limit').value) || 10;
+                
+                let allPotentialQ = [];
+                
+                if (category === 'unit_1_10' || category === 'all') {
+                    for (let i = 2; i <= 10; i++) {
+                        allPotentialQ.push({ n1: 1, n2: i, ans: Math.round((1/i)*10000)/100 });
+                    }
+                }
+                
+                if (category === 'unit_11_20' || category === 'all') {
+                    for (let i = 11; i <= 20; i++) {
+                        allPotentialQ.push({ n1: 1, n2: i, ans: Math.round((1/i)*10000)/100 });
+                    }
+                }
+
+                if (category === 'common' || category === 'all') {
+                    const commonFractions = [
+                        [2, 3], [3, 4], 
+                        [2, 5], [3, 5], [4, 5],
+                        [3, 8], [5, 8], [7, 8]
+                    ];
+                    commonFractions.forEach(f => {
+                        allPotentialQ.push({ n1: f[0], n2: f[1], ans: Math.round((f[0]/f[1])*10000)/100 });
+                    });
+                }
+                
+                this.shuffle(allPotentialQ);
+                
+                while (this.questions.length < limit && allPotentialQ.length > 0) {
+                    let temp = [...allPotentialQ];
+                    this.shuffle(temp);
+                    for (let i = 0; i < temp.length && this.questions.length < limit; i++) {
+                        this.questions.push(temp[i]);
+                    }
+                }
+
+                this.startQuestions();
+            },
+
             startQuestions() {
                 if (this.questions.length === 0) return;
                 this.navTo('screen-question');
@@ -1172,6 +1243,8 @@
                     } else {
                         text = `${q.n1}³`;
                     }
+                } else if (this.mode === 'fractions') {
+                    text = `${q.n1} / ${q.n2}`;
                 } else {
                     text = Math.random() > 0.5 ? `${q.n1} x ${q.n2}` : `${q.n2} x ${q.n1}`;
                 }
@@ -1259,7 +1332,7 @@
                         this.currentQIndex++;
                         this.loadQuestion();
                     }, 150); 
-                } else if ((this.mode === 'quiz' || this.mode === 'percentage' || this.mode === 'powers') && this.currentInput.length === correctAnsStr.length) {
+                } else if ((this.mode === 'quiz' || this.mode === 'percentage' || this.mode === 'powers' || this.mode === 'fractions') && this.currentInput.length === correctAnsStr.length) {
                     this.handleWrongAnswer(false);
                 }
             },
